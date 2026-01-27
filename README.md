@@ -17,8 +17,8 @@ SQL : Structured(구조화된) Query(질의) Language(언어) 표준화된 문�
   정의어(DDL: Data Definition Language)
    데이터베이스,테이블,사용자,뷰,인덱스,스키마 생성/수정/삭제
    생성 : CREATE DATABASE / CREATE TABLE / CREATE USER
-        수정 : ALTER DATABASE / ALTER TABLE / ALTER USER
-        삭제 : DROP DATABASE / DROP TABLE / DROP USER
+   수정 : ALTER DATABASE / ALTER TABLE / ALTER USER
+   삭제 : DROP DATABASE / DROP TABLE / DROP USER
    이름변경 : RENAME TABLE / RENAME USER
    보기 : SELECT
 
@@ -31,9 +31,8 @@ SQL : Structured(구조화된) Query(질의) Language(언어) 표준화된 문�
 
   제어어(DCL: Data Control Language)
    데이터의 보안, 무결성, 데이터회복, 병행수행 등...(데이터관리목적)
-       ROLLBACK : 트렌젝션 복귀
-   COMMIT : 트렌젝션 저장
-      (트렌젝션 : 일괄작업)
+   ROLLBACK : 트렌젝션 복귀
+   COMMIT : 트렌젝션 저장 (트렌젝션 : 일괄작업)
    GRANT : 권한 부여(사용자에게 관리자가 테이블 및 기능에 권한 부여)
-     REVOKE : 권한 삭제   
+   REVOKE : 권한 삭제   
 ```

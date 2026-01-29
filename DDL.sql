@@ -358,11 +358,241 @@ justtimestamp timestamp); -- 날짜시간 접속시간 스탬프~~~~
 insert into date_table values (now(),now(),now(),now()); -- 현재시간조회
 select * from date_table; -- 출력해봐
 
+# ========== join =====================
+
+																								# inner join (내부조인 교집합)
+select  -- 내부조인 조건에 맞는 데이터조회 -일치하는 테이블 조회하기
+a.customer_id, a.store_id, a.first_name, a.last_name, a.email, a.address_id
+as a_address_id,
+b.address_id as b_address_id, b.address, b.district, b.city_id, b.postal_code, b.phone, b.location
+from customer as a
+	inner join address as b on a.address_id = b.address_id
+where a.first_name = 'rosa';
+# a_address_id, b_address_id 로 별칭을 붙였다 
+
+select  -- 2개인 조인 조건으로 조인한 테이블에 조건에 맞는 데이터조회
+	a.customer_id, a.first_name, a.last_name,
+    b.address_id, b.address, b.district, b.postal_code
+from customer as a
+	inner join address as b on a.address_id = b.address_id and a.create_date = b.last_update
+where a.first_name = 'rosa';
+
+select  -- 3개의 테이블을 조인한 테이블에서 조건에 맞는 데이터조회
+	a.customer_id, a.first_name, a.last_name,
+    b.address_id, b.address, b.district, b.postal_code,
+    c.city_id, c.city
+from customer as a
+	inner join address as b on a.address_id = b.address_id
+    inner join city as c on b.city_id = c.city_id
+where a.first_name = 'rosa';
+
+																	# 외부조인 (outer join) -- 일치하지 않는 테이블 합치기 
+																	# left outer join -- 왼쪽 파일 전부포함 왼쪽파일 고정 붙이려는파일 합치기 해당란없음 null값
+select
+	 a.address, a.address_id as a_address_id,
+     b.address_id as b_address_id, b.store_id
+from address as a
+	left outer join store as b on a.address_id = b.address_id;
+    
+																	# 왼쪽파일 전체에서 교집합만 제외하기 -left outer join    (null값만 조회)
+SELECT
+	a.address,
+    a.address_id AS a_address_id,
+	b.address_id AS b_address_id, 
+    b.store_id
+FROM address AS a
+LEFT OUTER JOIN store AS b 
+	ON a.address_id = b.address_id
+WHERE b.address_id IS NULL;
+	
+																	# right outer join 오른쪽 파일 전부 포함 붙이려는파일 해당란없음 null값으로 표시
+SELECT
+	a.address, a.address_id AS a_address_id,
+	b.address_id AS b_address_id, b.store_id
+FROM address AS a
+	RIGHT OUTER JOIN store AS b ON a.address_id = b.address_id;
+
+																	# right outer join 오른쪽파일 기준으로 null 값 조회
+SELECT
+	a.address_id AS a_address_id, a.store_id,
+	b.address, b.address_id AS b_address_id
+FROM store AS a
+	RIGHT OUTER JOIN address AS b ON a.address_id = b.address_id
+WHERE a.address_id IS NULL;
+
+																	# full outer join --두개파일 다 합치기~~ 전부~~~
+SELECT
+	a.address_id AS a_address_id, a.store_id,
+	b.address, b.address_id AS b_address_id
+FROM store AS a
+	LEFT OUTER JOIN address AS b ON a.address_id = b.address_id
+
+UNION
+
+SELECT
+	a.address_id AS a_address_id, a.store_id,
+	b.address, b.address_id AS b_address_id
+FROM store AS a	
+	RIGHT OUTER JOIN address AS b ON a.address_id = b.address_id;
+
+																	# full outer join 에서 null 값만 조회하기
+SELECT
+	a.address_id AS a_address_id, a.store_id,
+	b.address, b.address_id AS b_address_id
+FROM store AS a
+	LEFT OUTER JOIN address AS b ON a.address_id = b.address_id
+WHERE b.address_id IS NULL
+
+UNION
+
+SELECT
+	a.address_id AS a_address_id, a.store_id,
+	b.address, b.address_id AS b_address_id
+FROM store AS a
+	RIGHT OUTER JOIN address AS b ON a.address_id = b.address_id
+WHERE a.address_id IS NULL;
+
+																	# cross join - 카르테시안 곱이라고도 함 (1번 a,b,c  2번 a,b,c  3번 a,b,c.....)
+create TABLE doit_cross1(num int);     -- 크로스테이블1 만들어
+create table doit_cross2(name varchar(10)); -- 크로스테이블2 만들어
+insert into doit_cross1 values (1), (2), (3); -- 크로스테이블1 순번 1,2,3
+insert into doit_cross2 values ('do'), ('it'), ('sql');  -- 크로스테이블2  do, it, sql 
+select
+	a.num, b.name
+from doit_cross1 as a
+	cross join doit_cross2 as b
+order by a.num;                                    -- 크로스테이블 do it sql 을 크로스해서 반복해바~~~
+
+															# where 절을 이용해 cross join을 만들어바
+select
+	a.num, b.name
+from doit_cross1 as a
+	cross join doit_cross2 as b
+where a.num = 1;                                          -- 크로스된 테이블에 1에 해당하는것만 출력해바
+
+															# self join  별칭을 꼭만들어서 쓴다 
+SELECT 
+	a.customer_id AS a_customer_id, b.customer_id AS b_customer_id
+    # 원하는파일의 행  을   별명을 지정      테이블 지정    한후   별명을 지정
+FROM customer AS a
+	# 이파일에서 a를 가져와
+	INNER JOIN customer AS b ON a.customer_id = b.customer_id;
+    # 안에서 조인할꺼야 이파일에 a,b 둘다 같다~
+    
+															# self join  별칭을 꼭만들어서 쓴다 2번째 
+SELECT
+	a.payment_id, a.amount, b.payment_id, b.amount, b.amount - a.amount AS profit_amount
+FROM payment AS a
+	LEFT OUTER JOIN payment AS b ON a.payment_id = b.payment_id -1;
+
+# 쿼리안에 또 다른 쿼리 (select를 두번쓴다~~~)
+# 서브쿼리 (select.... where(select.....)  중첩서브쿼리 where절 having절에도 사용할수있다!!!
+# 다중행 연산자라고도 한다
+# in 서브쿼리 임의의 값과 동일한거 검색
+# all 서브쿼리 모든값을 만족하는거
+# any 서브쿼리에 어느하나라도 만족하는거
+# exists 서브쿼리 만족하는값이 존재하는지 확인하는거
+
+#단일행 서브 쿼리 -- 조인하지 않고 다른테이블에 일치하는 값을 가져와~~~
+select * from customer
+where customer_id = (select customer_id from customer where first_name = 'rosa');
+
+															# in 을 이용한 서브쿼리
+select * from customer
+where first_name in ('rosa','ana');     -- select 를 사용하지 않고 직접 값을 넣어 조회
+
+select * from customer
+where customer_id in (select customer_id from customer where first_name in ('rosa','ana')); -- select를 사용해서 in 다중행 서브쿼리 적용
+
+SELECT
+	a.film_id, a.title
+FROM film AS a
+	INNER JOIN film_category AS b ON a.film_id = b.film_id
+	INNER JOIN category AS c ON b.category_id = c.category_id
+WHERE c.name = 'Action';								-- 테이블 3개를 조인하는 쿼리
+
+SELECT
+	film_id, title
+FROM film
+WHERE film_id IN (
+	SELECT a.film_id
+	FROM film_category AS a
+		INNER JOIN category AS b ON a.category_id = b.category_id
+	WHERE b.name = 'Action'
+	);													-- in 을 사용한 서브쿼리  위와 같은값이 나온다!!
+    
+SELECT
+	film_id, title
+FROM film
+WHERE film_id NOT IN (
+	SELECT a.film_id
+	FROM film_category AS a
+		INNER JOIN category AS b ON a.category_id = b.category_id
+	WHERE b.name = 'Action'
+	);													-- not in 을 사용한 서브쿼리
+
+														-- = any 를 사용한 서브쿼리
+SELECT * FROM customer
+WHERE customer_id = ANY (SELECT customer_id FROM customer WHERE first_name IN ('ROSA', 'ANA'));
+
+														-- < any 을 사용한 서브쿼리  보다 작은값
+SELECT * FROM customer
+WHERE customer_id < ANY (SELECT customer_id FROM customer WHERE first_name IN ('ROSA', 'ANA'));
+# rosa 112 ana 118번이야 그보다 작은 customer_id를 가져와~
+
+SELECT * FROM customer									-- > any을 사용한 서브쿼리   보다 큰값
+WHERE customer_id > ANY (SELECT customer_id FROM customer WHERE first_name IN ('ROSA', 'ANA'));
+# rosa 112 ana 118번이야 그보다 큰 customer_id를 가져와~
+
+-- exists 는 서브쿼리 결과값이 있는지없는지? 1행이라도 값이 있으면 참, 거짓이면 반환한다~~
+														-- exists를 사용한 서브쿼리 - True 일때~~
+select * from customer   -- 값이 있는것만 가져와~~~
+where exists(select customer_id from customer where first_name in ('rosa','ana'));
+
+select * from customer   								-- 찾는 값이 없을때 null으로 나타난다~~~
+where exists(select customer_id from customer where first_name in ('kang'));
+
+select * from customer   								-- not exists not를 사용하면 결과값이 없는걸 빼고 나머지를 가져온다~~~
+where not exists(select customer_id from customer where first_name in ('kang'));
+
+SELECT * FROM customer 									-- all 을 사용한 서브쿼리
+WHERE customer_id = ALL (SELECT customer_id FROM customer WHERE first_name IN ('ROSA', 'ANA'));  -- 두개가 만족하는값이 나오지않아서 null으로 나와~ 두명이합쳐서 입력되는건 없잖아~!!
 
 
+--  이 밑에는 동일값이 나오는데 다른방법으로 이용할수있다는 거야~ 찬찬히 읽어바=====================================
+SELECT
+	a.film_id, a.title, a.special_features, c.name
+FROM film AS a
+	INNER JOIN film_category AS b ON a.film_id = b.film_id
+	INNER JOIN category AS c ON b.category_id = c.category_id
+WHERE a.film_id > 10 AND a.film_id < 20;               -- 테이블 조인  아이디가 10~20사이값을 가져와바
+
+SELECT
+	a.film_id, a.title, a.special_features, x.name
+FROM film AS a
+INNER JOIN (
+	SELECT
+		b.film_id, c.name
+	FROM film_category AS b
+		INNER JOIN category AS c ON b.category_id = c.category_id
+	WHERE b.film_id > 10 AND b.film_id < 20
+	) AS x ON a.film_id = x.film_id;                  -- from 절에 서브쿼리 적용  위에있는것과 결과 값이 동일해~~~
+    
+SELECT
+	a.film_id, a.title, a.special_features, c.name
+FROM film AS a
+	INNER JOIN film_category AS b ON a.film_id = b.film_id
+	INNER JOIN category AS c ON b.category_id = c.category_id
+WHERE a.film_id > 10 AND a.film_id < 20;               -- 테이블 조인해보자 10~20사이 가져와바
+
+SELECT
+	a.film_id, a.title, a.special_features, (SELECT c.name FROM film_category as
+	b INNER JOIN category AS c ON b.category_id = c.category_id WHERE a.film_id =
+	b.film_id) AS name
+FROM film AS a
+WHERE a.film_id > 10 AND a.film_id < 20;             -- select 절에 서브쿼리적용해봤어 그래도 위에와 같은 값이 나와~~ 편한거 쓰자~!! 알고만있어
 
 
-
-
+                                                        
 
 
